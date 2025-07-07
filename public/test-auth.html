@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Auth API Laravel 12</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .token-display {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Auth API Laravel 12</h1>
+        
+        <!-- Login Form -->
+        <div id="loginSection">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+        </div>
+
+        <!-- Token Display -->
+        <div id="tokenSection" style="display: none;">
+            <h2>Current Token</h2>
+            <div id="tokenDisplay" class="token-display"></div>
+            <button class="btn btn-success" onclick="getCurrentUser()">Get Current User</button>
+            <button class="btn btn-danger" onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Results -->
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000/api';
+        let currentToken = null;
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            login();
+        });
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            fetch(`${API_BASE_URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.token) {
+                    currentToken = data.token;
+                    showToken();
+                    showResult('SUCCESS: Login berhasil!', data, 'success');
+                } else {
+                    showResult('ERROR: Login gagal!', data, 'error');
+                }
+            })
+            .catch(error => {
+                showResult('ERROR: Login gagal!', error.message, 'error');
+            });
+        }
+
+        function logout() {
+            if (!currentToken) {
+                showResult('ERROR: Tidak ada token aktif!', 'Silakan login terlebih dahulu', 'error');
+                return;
+            }
+
+            fetch(`${API_BASE_URL}/logout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${currentToken}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                currentToken = null;
+                hideToken();
+                showResult('SUCCESS: Logout berhasil!', data, 'success');
+            })
+            .catch(error => {
+                showResult('ERROR: Logout gagal!', error.message, 'error');
+            });
+        }
+
+        function getCurrentUser() {
+            if (!currentToken) {
+                showResult('ERROR: Tidak ada token aktif!', 'Silakan login terlebih dahulu', 'error');
+                return;
+            }
+
+            fetch(`${API_BASE_URL}/me`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${currentToken}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                showResult('SUCCESS: Data user berhasil diambil!', data, 'success');
+            })
+            .catch(error => {
+                showResult('ERROR: Gagal mengambil data user!', error.message, 'error');
+            });
+        }
+
+        function showToken() {
+            document.getElementById('tokenSection').style.display = 'block';
+            document.getElementById('tokenDisplay').textContent = currentToken;
+        }
+
+        function hideToken() {
+            document.getElementById('tokenSection').style.display = 'none';
+            document.getElementById('tokenDisplay').textContent = '';
+        }
+
+        function showResult(title, data, type) {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = `
+                <strong>${title}</strong><br>
+                <strong>Timestamp:</strong> ${new Date().toLocaleString()}<br>
+                <strong>Response:</strong><br>
+                ${JSON.stringify(data, null, 2)}
+            `;
+            resultsDiv.appendChild(resultDiv);
+            
+            // Auto-scroll to bottom
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        // Clear results function
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+    </script>
+</body>
+</html> 
