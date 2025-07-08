@@ -14,10 +14,6 @@ Route::get('/test-cors', function () {
     ]);
 });
 
-Route::options('/{any}', function () {
-    return response()->json([], 204);
-})->where('any', '.*');
-
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
