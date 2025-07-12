@@ -3,8 +3,8 @@
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['http://localhost:5173', 'https://web-bps-frontend.vercel.app'],
-    'allowed_origins_patterns' => [],
+    'allowed_origins' => ['https://web-bps-frontend.vercel.app'],
+    'allowed_origins_ patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
     'max_age' => 0,
