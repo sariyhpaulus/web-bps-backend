@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: web-bps-backend
+    env: docker
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        value: shortline.proxy.rlw.net
+      - key: DB_PORT
+        value: 47047
+      - key: DB_DATABASE
+        value: railway
+      - key: DB_USERNAME
+        value: root
+      - key: DB_PASSWORD
+        value: <isi dari Railway>
+      - key: APP_URL
+        value: <akan otomatis terisi URL dari Render>
