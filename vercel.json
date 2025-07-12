@@ -18,6 +18,7 @@
         "APP_ENV": "production",
         "APP_DEBUG": "true",
         "APP_URL": "https://web-bps-backend.vercel.app",
+        "APP_KEY": "base64:Okh0G0xtkBBwJOw2dVko8wJqZ3Oizf2UIMhhZT6IISI="
 
         "CACHE_DRIVER": "array",
         "LOG_CHANNEL": "stderr",
