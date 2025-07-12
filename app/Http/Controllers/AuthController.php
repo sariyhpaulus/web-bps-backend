@@ -10,23 +10,30 @@ class AuthController extends Controller
     // Login method to authenticate users
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        try {
+            $credentials = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
+            ]);
 
-        if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Login gagal'], 401);
+            if (!Auth::attempt($credentials)) {
+                return response()->json(['message' => 'Email atau password salah'], 401);
+            }
+
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            $token = $user->createToken('api-token')->plainTextToken;
+
+            return response()->json([
+                'user' => $user,
+                'token' => $token,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat login.',
+                'error' => $e->getMessage(), // Untuk debug. Hapus di produksi
+            ], 500);
         }
-
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $token = $user->createToken('api-token')->plainTextToken;
-
-        return response()->json([
-            'user' => $user,
-            'token' => $token,
-        ]);
     }
 
     // Logout method to revoke current token
@@ -49,4 +56,4 @@ class AuthController extends Controller
             'status' => 'success'
         ]);
     }
-} 
+}
